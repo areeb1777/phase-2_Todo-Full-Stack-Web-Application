@@ -1,0 +1,208 @@
+# API Contracts: Todo App
+
+## Overview
+This document outlines the planned API contracts that will be implemented in the next phase of the Todo application. These contracts are designed to align with the frontend components developed in Phase II-A and provide a seamless integration path.
+
+## Base URL
+```
+https://api.todoapp.com/v1
+```
+
+## Authentication
+All endpoints (except health check) require authentication via JWT token in the Authorization header:
+```
+Authorization: Bearer {jwt_token}
+```
+
+## Common Headers
+- Content-Type: application/json
+- Accept: application/json
+
+## Data Models
+
+### Task Resource
+```json
+{
+  "id": "string",
+  "title": "string",
+  "description": "string | null",
+  "completed": "boolean",
+  "createdAt": "string (ISO 8601)",
+  "updatedAt": "string (ISO 8601)"
+}
+```
+
+## Endpoints
+
+### Health Check
+```
+GET /health
+```
+
+#### Response
+```
+Status: 200 OK
+{
+  "status": "healthy",
+  "timestamp": "string (ISO 8601)"
+}
+```
+
+### Task Management
+
+#### List Tasks
+```
+GET /tasks
+```
+
+##### Query Parameters
+- `completed`: boolean (optional) - Filter by completion status
+- `limit`: integer (optional) - Number of tasks to return (default: 50, max: 100)
+- `offset`: integer (optional) - Offset for pagination (default: 0)
+
+##### Response
+```
+Status: 200 OK
+{
+  "tasks": [
+    {
+      "id": "string",
+      "title": "string",
+      "description": "string | null",
+      "completed": "boolean",
+      "createdAt": "string (ISO 8601)",
+      "updatedAt": "string (ISO 8601)"
+    }
+  ],
+  "pagination": {
+    "total": "integer",
+    "limit": "integer",
+    "offset": "integer",
+    "hasMore": "boolean"
+  }
+}
+```
+
+#### Create Task
+```
+POST /tasks
+```
+
+##### Request Body
+```json
+{
+  "title": "string",
+  "description": "string | null"
+}
+```
+
+##### Response
+```
+Status: 201 Created
+{
+  "task": {
+    "id": "string",
+    "title": "string",
+    "description": "string | null",
+    "completed": "boolean",
+    "createdAt": "string (ISO 8601)",
+    "updatedAt": "string (ISO 8601)"
+  }
+}
+```
+
+##### Validation
+- `title` is required and must be between 1-255 characters
+- `description` is optional and can be up to 1000 characters
+
+#### Get Task
+```
+GET /tasks/{taskId}
+```
+
+##### Response
+```
+Status: 200 OK
+{
+  "task": {
+    "id": "string",
+    "title": "string",
+    "description": "string | null",
+    "completed": "boolean",
+    "createdAt": "string (ISO 8601)",
+    "updatedAt": "string (ISO 8601)"
+  }
+}
+```
+
+#### Update Task
+```
+PATCH /tasks/{taskId}
+```
+
+##### Request Body
+```json
+{
+  "title": "string",
+  "description": "string | null",
+  "completed": "boolean"
+}
+```
+
+##### Response
+```
+Status: 200 OK
+{
+  "task": {
+    "id": "string",
+    "title": "string",
+    "description": "string | null",
+    "completed": "boolean",
+    "createdAt": "string (ISO 8601)",
+    "updatedAt": "string (ISO 8601)"
+  }
+}
+```
+
+#### Delete Task
+```
+DELETE /tasks/{taskId}
+```
+
+##### Response
+```
+Status: 204 No Content
+```
+
+## Error Responses
+
+### Common Error Format
+```json
+{
+  "error": {
+    "code": "string",
+    "message": "string",
+    "details": "object | null"
+  }
+}
+```
+
+### Common Error Codes
+- `VALIDATION_ERROR`: Request validation failed
+- `NOT_FOUND`: Requested resource does not exist
+- `UNAUTHORIZED`: Authentication required or invalid
+- `FORBIDDEN`: Insufficient permissions
+- `INTERNAL_ERROR`: Internal server error
+
+## Future Considerations
+
+### Planned Endpoints (Phase III)
+- Bulk operations for tasks
+- Task categories/tags
+- User management
+- Task sharing/collaboration features
+
+### Rate Limiting
+All authenticated endpoints will implement rate limiting:
+- 1000 requests per hour per user
+- 100 requests per minute per IP for unauthenticated endpoints
