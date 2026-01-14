@@ -1,8 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  // Disable Turbopack to avoid lightningcss issues on Windows
-  // This forces Next.js to use webpack instead of Turbopack
-};
+// Keep the config minimal and compatible with Next.js 16.x
+const nextConfig: NextConfig = {};
 
 export default nextConfig;
