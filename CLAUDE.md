@@ -212,6 +212,8 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 ## Active Technologies
 - TypeScript with Next.js 16+ (App Router) + Next.js, React, Tailwind CSS, lucide-react (001-todo-frontend-ui)
 - In-memory React state (no external storage) (001-todo-frontend-ui)
+- Python 3.12, TypeScript/JavaScript, Next.js 16+ + FastAPI, Better Auth (frontend), SQLAlchemy, JWT, bcrypt (003-auth-multi-user)
+- Neon PostgreSQL database (with SQLite fallback for development) (003-auth-multi-user)
 
 ## Recent Changes
 - 001-todo-frontend-ui: Added TypeScript with Next.js 16+ (App Router) + Next.js, React, Tailwind CSS, lucide-react

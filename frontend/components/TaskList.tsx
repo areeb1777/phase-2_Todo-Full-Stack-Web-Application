@@ -19,7 +19,7 @@ export default function TaskList({ tasks, onToggleComplete, onDelete, onEdit }: 
   });
 
   return (
-    <div className="mb-6">
+    <div className="p-6">
       {sortedTasks.length === 0 ? (
         <EmptyState />
       ) : (

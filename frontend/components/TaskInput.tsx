@@ -3,6 +3,7 @@ import { Plus, Save } from 'lucide-react';
 import { CreateTaskInput } from '@/lib/types';
 
 interface TaskInputProps {
+  id?: string;
   onAddTask: (taskData: CreateTaskInput) => void;
   initialData?: {
     title: string;
@@ -10,7 +11,7 @@ interface TaskInputProps {
   };
 }
 
-export default function TaskInput({ onAddTask, initialData }: TaskInputProps) {
+export default function TaskInput({ id, onAddTask, initialData }: TaskInputProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
@@ -43,9 +44,9 @@ export default function TaskInput({ onAddTask, initialData }: TaskInputProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-6 transition-shadow hover:shadow-lg">
+    <form id={id} onSubmit={handleSubmit} className="bg-card rounded-xl shadow-lg border border-border/50 p-6 transition-all duration-200">
       <div className="mb-4">
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="title" className="block text-sm font-medium text-foreground/80 mb-2">
           Task Title *
         </label>
         <input
@@ -54,12 +55,12 @@ export default function TaskInput({ onAddTask, initialData }: TaskInputProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="What needs to be done?"
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-500"
+          className="w-full px-4 py-3 bg-background/50 border border-border focus:ring-2 focus:ring-primary/50 focus:border-primary/50 rounded-lg transition-all text-foreground placeholder-foreground/50"
           required
         />
       </div>
-      <div className="mb-4">
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+      <div className="mb-6">
+        <label htmlFor="description" className="block text-sm font-medium text-foreground/80 mb-2">
           Description (Optional)
         </label>
         <textarea
@@ -67,13 +68,13 @@ export default function TaskInput({ onAddTask, initialData }: TaskInputProps) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Add details..."
-          rows={2}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-500"
+          rows={3}
+          className="w-full px-4 py-3 bg-background/50 border border-border focus:ring-2 focus:ring-primary/50 focus:border-primary/50 rounded-lg transition-all text-foreground placeholder-foreground/50 resize-none"
         />
       </div>
       <button
         type="submit"
-        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md flex items-center justify-center gap-2 transition-colors duration-200"
+        className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all duration-200"
       >
         {initialData ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
         {initialData ? 'Update Task' : 'Add Task'}
