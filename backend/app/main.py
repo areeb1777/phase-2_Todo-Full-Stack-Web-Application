@@ -24,7 +24,11 @@ app = FastAPI(
 # Configure CORS for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure based on your frontend URL in production
+    allow_origins=[
+        "http://localhost:3000",      # Local frontend development
+        "http://localhost:3001",      # Alternative local frontend port
+        "https://areeb-todo.vercel.app"  # Your deployed frontend on Vercel
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

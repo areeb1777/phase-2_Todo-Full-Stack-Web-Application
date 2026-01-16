@@ -18,9 +18,11 @@ export default function LoginPage() {
     setError('');
 
     try {
+      // The todoApi.login should update the token in localStorage
       await todoApi.login({ email, password });
-      router.push('/'); // Redirect to dashboard after login
-      router.refresh(); // Refresh to update the UI
+
+      // Force a page refresh to ensure AuthContext updates properly
+      window.location.href = '/';
     } catch (err: any) {
       if (err.message.includes('401')) {
         setError('Invalid email or password. Please try again.');

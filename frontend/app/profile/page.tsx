@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { todoApi } from '@/lib/api';
+import { Task } from '@/lib/types';
 import { LogOut, User, Mail, Calendar, CheckCircle, Clock, Trash2, Edit3, Camera, ArrowLeft } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -10,6 +12,27 @@ export default function ProfilePage() {
   const router = useRouter();
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        if (user) {
+          const userTasks = await todoApi.getAll();
+          setTasks(userTasks);
+        }
+      } catch (error) {
+        console.error('Error loading tasks:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      loadTasks();
+    }
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -61,6 +84,15 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+  // Calculate stats from actual tasks
+  const completedTasks = tasks.filter(task => task.completed).length;
+  const pendingTasks = tasks.filter(task => !task.completed).length;
+
+  // Sort tasks by creation date (most recent first) for activity feed
+  const sortedTasks = [...tasks].sort((a, b) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/5 pt-20 pb-12">
@@ -136,7 +168,7 @@ export default function ProfilePage() {
                 <CheckCircle className="w-6 h-6 text-primary" />
               </div>
               <div className="ml-4">
-                <p className="text-2xl font-bold text-foreground">12</p>
+                <p className="text-2xl font-bold text-foreground">{completedTasks}</p>
                 <p className="text-sm text-foreground/60">Completed Tasks</p>
               </div>
             </div>
@@ -148,7 +180,7 @@ export default function ProfilePage() {
                 <Clock className="w-6 h-6 text-foreground/70" />
               </div>
               <div className="ml-4">
-                <p className="text-2xl font-bold text-foreground">5</p>
+                <p className="text-2xl font-bold text-foreground">{pendingTasks}</p>
                 <p className="text-sm text-foreground/60">Pending Tasks</p>
               </div>
             </div>
@@ -160,8 +192,8 @@ export default function ProfilePage() {
                 <User className="w-6 h-6 text-accent" />
               </div>
               <div className="ml-4">
-                <p className="text-2xl font-bold text-foreground">Active</p>
-                <p className="text-sm text-foreground/60">Account Status</p>
+                <p className="text-2xl font-bold text-foreground">{tasks.length}</p>
+                <p className="text-sm text-foreground/60">Total Tasks</p>
               </div>
             </div>
           </div>
@@ -213,27 +245,24 @@ export default function ProfilePage() {
         <div className="bg-card rounded-xl p-6 shadow-lg border border-border/50">
           <h3 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h3>
           <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-              <div>
-                <p className="text-foreground font-medium">Created new task</p>
-                <p className="text-sm text-foreground/60">Today at 10:30 AM</p>
+            {sortedTasks.slice(0, 5).map((task, index) => (
+              <div key={`${task.id}-${index}`} className="flex items-start space-x-3">
+                <div className={`w-2 h-2 rounded-full mt-2 ${task.completed ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                <div>
+                  <p className="text-foreground font-medium">
+                    {task.completed ? 'Completed task' : 'Created task'}
+                  </p>
+                  <p className="text-sm text-foreground/60">
+                    "{task.title}" on {new Date(task.createdAt).toLocaleString()}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-              <div>
-                <p className="text-foreground font-medium">Completed 3 tasks</p>
-                <p className="text-sm text-foreground/60">Yesterday at 5:45 PM</p>
+            ))}
+            {sortedTasks.length === 0 && (
+              <div className="text-center py-4 text-foreground/60">
+                <p>No recent activity yet. Create your first task!</p>
               </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-              <div>
-                <p className="text-foreground font-medium">Updated profile picture</p>
-                <p className="text-sm text-foreground/60">Today at 9:15 AM</p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
