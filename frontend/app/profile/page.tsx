@@ -19,7 +19,15 @@ export default function ProfilePage() {
     const loadTasks = async () => {
       try {
         if (user) {
-          const userTasks = await todoApi.getAll();
+          const userTodos = await todoApi.getAll();
+          // Convert Todo objects from API to Task objects for frontend
+          const userTasks = userTodos.map(todo => ({
+            id: todo.id,
+            title: todo.title,
+            description: todo.description,
+            completed: todo.completed,
+            createdAt: new Date(todo.created_at)
+          }));
           setTasks(userTasks);
         }
       } catch (error) {
