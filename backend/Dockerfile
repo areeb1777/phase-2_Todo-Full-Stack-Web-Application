@@ -14,5 +14,5 @@ COPY . .
 # Expose the port (Hugging Face typically uses PORT environment variable)
 EXPOSE 7860
 
-# Run the application using the main.py file structure
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860", "--reload"]
+# Run the application using the app.main file structure
+CMD ["python", "run.py"]

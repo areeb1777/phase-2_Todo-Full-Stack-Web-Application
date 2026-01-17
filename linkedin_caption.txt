@@ -1,0 +1,17 @@
+🚀 Excited to share that Hackathon II - Phase II is completed and live now!
+
+🎯 Built a comprehensive Todo Full-Stack Web Application featuring:
+• Frontend: Next.js 16+, React 19, TypeScript, Tailwind CSS
+• Backend: FastAPI, Python 3.12 with JWT authentication
+• Database: PostgreSQL (Neon) with SQLAlchemy ORM
+• Authentication: Secure login/register with profile management
+• Real-time: Full CRUD operations with optimistic updates
+• Responsive UI: Modern design with task statistics and dark/light mode
+
+✨ Key features include user authentication, task management with completion tracking, profile customization, and a beautiful responsive interface. The application seamlessly integrates frontend and backend with proper error handling and loading states.
+
+Live URL: https://areeb-todo.vercel.app/
+
+💻 This project showcases modern full-stack development practices with clean architecture, proper state management, and secure authentication flows.
+
+#FullStackDevelopment #NextJS #FastAPI #Python #React #Hackathon #WebDevelopment #TypeScript #PostgreSQL #Authentication

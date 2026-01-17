@@ -14,7 +14,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/todos", tags=["todos"])
 
 @router.get("/", response_model=List[TodoResponse])
-def get_todos(current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_todos(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     try:
         # Filter todos by the current user's ID
         todos = db.query(Todo).filter(Todo.user_id == current_user.id).order_by(desc(Todo.created_at)).all()
@@ -27,7 +30,11 @@ def get_todos(current_user = Depends(get_current_user), db: Session = Depends(ge
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
 @router.post("/", response_model=TodoResponse, status_code=201)
-def create_todo(todo: TodoCreate, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+def create_todo(
+    todo: TodoCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     try:
         # Create a new todo associated with the current user
         db_todo = Todo(**todo.dict(), user_id=current_user.id)
@@ -45,7 +52,12 @@ def create_todo(todo: TodoCreate, current_user = Depends(get_current_user), db: 
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
 @router.put("/{id}", response_model=TodoResponse)
-def update_todo(id: str, todo_update: TodoUpdate, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+def update_todo(
+    id: str,
+    todo_update: TodoUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     try:
         # Find the todo and ensure it belongs to the current user
         db_todo = db.query(Todo).filter(Todo.id == id, Todo.user_id == current_user.id).first()
@@ -69,7 +81,11 @@ def update_todo(id: str, todo_update: TodoUpdate, current_user = Depends(get_cur
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
 @router.delete("/{id}", status_code=204)
-def delete_todo(id: str, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+def delete_todo(
+    id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     try:
         # Find the todo and ensure it belongs to the current user
         db_todo = db.query(Todo).filter(Todo.id == id, Todo.user_id == current_user.id).first()

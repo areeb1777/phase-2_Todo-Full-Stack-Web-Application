@@ -24,16 +24,12 @@ app = FastAPI(
 # Configure CORS for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",      # Local frontend development
-        "http://localhost:3001",      # Alternative local frontend port
-        "https://areeb-todo.vercel.app"  # Your deployed frontend on Vercel
-    ],
+    allow_origins=["*"],  # Allow all origins for Hugging Face Space deployment
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     # Expose headers that the frontend might need
-    expose_headers=["Access-Control-Allow-Origin"]
+    expose_headers=["Access-Control-Allow-Origin", "Authorization"]
 )
 
 app.include_router(todos.router)
