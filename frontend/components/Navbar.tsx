@@ -33,6 +33,7 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Dashboard', href: '/', icon: Home },
     { name: 'Add Task', href: '/', icon: Plus, onClick: () => document.getElementById('task-input')?.focus() },
+    { name: 'Profile', href: '/profile', icon: User },
   ];
 
   if (!isAuthenticated) {
@@ -177,6 +178,19 @@ export default function Navbar() {
                   </Link>
                 );
               })}
+
+              <Link
+                href="/profile"
+                onClick={() => setIsMenuOpen(false)}
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center ${
+                  pathname === '/profile'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-foreground/70 hover:text-foreground hover:bg-accent/20'
+                }`}
+              >
+                <User className="w-4 h-4 mr-2" />
+                Profile
+              </Link>
 
               <button
                 onClick={handleLogout}
