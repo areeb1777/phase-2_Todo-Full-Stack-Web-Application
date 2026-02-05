@@ -1,8 +1,0 @@
-#!/bin/sh
-'''exec' "/mnt/d/Web Development/AI/AI-Native Hackathon/Hackathon-2-Todo_App/Phase-II_Full-Stack-Todo-App/backend/venv_backend/bin/python3" "$0" "$@"
-' '''
-import sys
-from charset_normalizer.cli import cli_detect
-if __name__ == '__main__':
-    sys.argv[0] = sys.argv[0].removesuffix('.exe')
-    sys.exit(cli_detect())
