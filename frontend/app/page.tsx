@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import TaskInput from '@/components/TaskInput';
 import TaskList from '@/components/TaskList';
+import ChatBot from '@/components/ChatBot';
 import { Task, CreateTaskInput } from '@/lib/types';
 import { todoApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -187,6 +188,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background pt-20">
       <Navbar />
+      <ChatBot />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Banner */}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { todoApi } from '@/lib/api';
+import ChatBot from '@/components/ChatBot';
 import { Lock, Mail, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -39,6 +40,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-accent/10 p-4">
+      <ChatBot />
       <div className="w-full max-w-md">
         {/* Logo Header */}
         <div className="text-center mb-8">

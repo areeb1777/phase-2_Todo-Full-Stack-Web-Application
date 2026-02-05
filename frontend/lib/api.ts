@@ -1,5 +1,5 @@
 // API service for interacting with the backend Todo API
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7860';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // Helper functions for token management
 const TOKEN_KEY = 'todo_app_token';
@@ -266,7 +266,6 @@ export const todoApi = {
       const response = await fetchWithRetry(`${API_BASE_URL}/profile/update`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
-        body: JSON.stringify(userData),
       });
       return response.json();
     } catch (error) {
@@ -274,3 +273,76 @@ export const todoApi = {
     }
   }
 };
+
+// Types for chat functionality
+export interface ChatMessage {
+  id: string;
+  conversation_id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  created_at: string; // ISO string format
+}
+
+export interface ChatRequest {
+  message: string;
+  conversation_id?: string;
+}
+
+export interface ChatResponse {
+  conversation_id: string;
+  response: string;
+  tool_calls: Array<{
+    id: string;
+    function: {
+      name: string;
+      arguments: string;
+    };
+    type: string;
+  }>;
+  success: boolean;
+}
+
+export interface Conversation {
+  id: string;
+  user_id: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+// Chat API methods
+export const chatApi = {
+  async sendMessage(userId: string, requestData: ChatRequest): Promise<ChatResponse> {
+    try {
+      const response = await fetchWithRetry(`${API_BASE_URL}/chat/${userId}`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(requestData),
+      });
+      return response.json();
+    } catch (error) {
+      throw new Error(`Failed to send message: ${error}`);
+    }
+  },
+
+  async getUserConversations(userId: string): Promise<Conversation[]> {
+    try {
+      const response = await fetchWithRetry(`${API_BASE_URL}/chat/${userId}/conversations`, {
+        headers: getAuthHeaders(),
+      });
+      return response.json();
+    } catch (error) {
+      throw new Error(`Failed to get user conversations: ${error}`);
+    }
+  },
+
+  async getConversationMessages(userId: string, conversationId: string): Promise<ChatMessage[]> {
+    try {
+      const response = await fetchWithRetry(`${API_BASE_URL}/chat/${userId}/conversations/${conversationId}/messages`, {
+        headers: getAuthHeaders(),
+      });
+      return response.json();
+    } catch (error) {
+      throw new Error(`Failed to get conversation messages: ${error}`);
+    }
+  }
+};;

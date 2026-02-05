@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { todoApi } from '@/lib/api';
+import ChatBot from '@/components/ChatBot';
 import { Task } from '@/lib/types';
 import { LogOut, User, Mail, Calendar, CheckCircle, Clock, Trash2, Edit3, Camera, ArrowLeft } from 'lucide-react';
 
@@ -104,6 +105,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/5 pt-20 pb-12">
+      <ChatBot />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Profile Header */}
         <div className="bg-card rounded-2xl shadow-xl overflow-hidden mb-8">

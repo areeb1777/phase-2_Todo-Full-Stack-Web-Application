@@ -1,0 +1,126 @@
+openapi: 3.0.3
+info:
+  title: AI Todo Chatbot API
+  description: API for the AI-powered todo chatbot feature
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+paths:
+  /api/{user_id}/chat:
+    post:
+      summary: Process user message and return AI response
+      description: Handles natural language input from users and returns AI-generated responses with tool calls for task operations
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: Unique identifier of the user
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Successful response from AI chatbot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '400':
+          description: Invalid request format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    ChatRequest:
+      type: object
+      required:
+        - message
+      properties:
+        conversation_id:
+          type: integer
+          format: int64
+          description: Optional ID of existing conversation to continue
+          example: 12345
+        message:
+          type: string
+          description: User's natural language message
+          example: "add buy groceries tomorrow"
+
+    ChatResponse:
+      type: object
+      required:
+        - conversation_id
+        - response
+        - tool_calls
+      properties:
+        conversation_id:
+          type: integer
+          format: int64
+          description: ID of the conversation (new or existing)
+          example: 12345
+        response:
+          type: string
+          description: AI-generated response to the user
+          example: "I've added 'buy groceries' to your tasks for tomorrow."
+        tool_calls:
+          type: array
+          description: List of tools called by the AI agent
+          items:
+            $ref: '#/components/schemas/ToolCall'
+
+    ToolCall:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the tool that was called
+          enum: [add_task, list_tasks, update_task, complete_task, delete_task]
+          example: "add_task"
+        arguments:
+          type: object
+          description: Arguments passed to the tool
+          example:
+            user_id: 1
+            title: "buy groceries"
+            description: "get milk, bread, eggs"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Invalid request format"

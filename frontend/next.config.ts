@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
-// Keep the config minimal and compatible with Next.js 16.x
-const nextConfig: NextConfig = {};
+// Next.js configuration
+const nextConfig: NextConfig = {
+  // Disable experimental Turbopack
+  experimental: {
+    // Alternative way to disable Turbopack if needed
+    // turbo: false,
+  },
+};
 
 export default nextConfig;
