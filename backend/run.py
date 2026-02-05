@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     # Run the server
     uvicorn.run(
-        "app.main:app",  # Reference the app instance in app/main.py
+        "main:app",  # Reference the app instance in main.py (root directory)
         host="0.0.0.0",
         port=port,
         reload=False,  # Disable reload for Hugging Face Spaces
