@@ -12,3 +12,4 @@ passlib==1.7.4
 pyjwt==2.9.0
 python-multipart==0.0.12
 Pillow==10.0.0
+openai==1.57.4

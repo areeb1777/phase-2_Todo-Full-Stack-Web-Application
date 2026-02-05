@@ -5,7 +5,7 @@ Utility functions for the Todo API
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import text
 from app.database import engine, Base
-from app.models import Todo, User
+from app.models import Todo, User, Conversation, Message
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def ensure_tables_exist():
     """Ensure database tables exist, create them if they don't"""
     try:
-        # Try to create the tables
+        # Try to create all tables (including Conversation and Message)
         Base.metadata.create_all(bind=engine)
 
         # Test the connection by trying to access the todos table

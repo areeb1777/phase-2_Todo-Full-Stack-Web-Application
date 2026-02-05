@@ -42,3 +42,48 @@ class TodoResponse(TodoBase):
 
     class Config:
         from_attributes = True
+
+
+# Conversation Schemas
+class ConversationBase(BaseModel):
+    user_id: UUID
+
+
+class ConversationCreate(ConversationBase):
+    pass
+
+
+class ConversationUpdate(BaseModel):
+    pass
+
+
+class ConversationResponse(ConversationBase):
+    id: UUID
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# Message Schemas
+class MessageBase(BaseModel):
+    conversation_id: UUID
+    role: str = Field(..., pattern=r"^(user|assistant)$")  # 'user' or 'assistant'
+    content: str = Field(..., max_length=2000)
+
+
+class MessageCreate(MessageBase):
+    pass
+
+
+class MessageUpdate(BaseModel):
+    content: Optional[str] = Field(None, max_length=2000)
+
+
+class MessageResponse(MessageBase):
+    id: UUID
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

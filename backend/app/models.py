@@ -63,5 +63,33 @@ class Todo(Base):
     user = relationship("User", back_populates="todos")
 
 
+class Conversation(Base):
+    __tablename__ = "conversations"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID(), ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationship to User
+    user = relationship("User", back_populates="conversations")
+    # Relationship to Message
+    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
+
+
+class Message(Base):
+    __tablename__ = "messages"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    conversation_id = Column(GUID(), ForeignKey("conversations.id"), nullable=False)
+    role = Column(String(20), nullable=False)  # 'user' or 'assistant'
+    content = Column(String(2000), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationship to Conversation
+    conversation = relationship("Conversation", back_populates="messages")
+
+
 # Add relationship to User model
 User.todos = relationship("Todo", back_populates="user", cascade="all, delete-orphan")
+User.conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
