@@ -217,6 +217,202 @@ app.add_middleware(
 )
 ```
 
+## Docker Deployment (Local Development)
+
+### Prerequisites
+- Docker Engine 20.10+
+- Docker Compose 2.0+
+
+### Quick Start
+
+1. **Clone the repository**:
+```bash
+git clone <repository-url>
+cd Phase-II_Full-Stack-Todo-App
+```
+
+2. **Set up environment variables**:
+
+Create a `.env` file in the project root (or export these variables):
+```bash
+# Required for chatbot functionality
+export OPENAI_API_KEY=your-openrouter-api-key-here
+
+# Optional: Change JWT secret for production
+export JWT_SECRET_KEY=your-super-secret-key-change-in-production
+
+# Optional: Customize OpenRouter settings
+export OPENAI_BASE_URL=https://openrouter.ai/api/v1
+export MODEL=mistralai/mistral-7b-instruct
+```
+
+Or copy from `.env.example` files:
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+# Edit .env files with your values
+```
+
+3. **Start the application**:
+```bash
+docker compose up --build
+```
+
+4. **Access the application**:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+- Health Check: http://localhost:8000/health
+
+### Architecture
+
+The Docker setup consists of two services:
+
+```
+┌─────────────────────────────────────┐
+│  Frontend (Next.js)                 │
+│  Port: 3000                         │
+│  - Multi-stage build                │
+│  - Standalone output mode           │
+│  - Non-root user (nextjs)           │
+└──────────────┬──────────────────────┘
+               │ depends_on (health)
+               ▼
+┌─────────────────────────────────────┐
+│  Backend (FastAPI)                  │
+│  Port: 8000                         │
+│  - Health check endpoint            │
+│  - SQLite database (persistent)     │
+│  - Non-root user (appuser)          │
+│  - Volume: backend-data             │
+└─────────────────────────────────────┘
+```
+
+### Docker Commands
+
+**Start services** (with build):
+```bash
+docker compose up --build
+```
+
+**Start services** (detached mode):
+```bash
+docker compose up -d
+```
+
+**View logs**:
+```bash
+docker compose logs -f
+docker compose logs -f backend  # Backend only
+docker compose logs -f frontend # Frontend only
+```
+
+**Stop services**:
+```bash
+docker compose down
+```
+
+**Stop and remove volumes** (⚠️ deletes database):
+```bash
+docker compose down -v
+```
+
+**Rebuild specific service**:
+```bash
+docker compose build backend
+docker compose build frontend
+```
+
+### Troubleshooting
+
+#### Port Already in Use
+
+If ports 3000 or 8000 are already in use, modify `docker-compose.yml`:
+
+```yaml
+services:
+  backend:
+    ports:
+      - "8001:8000"  # Change host port to 8001
+  frontend:
+    ports:
+      - "3001:3000"  # Change host port to 3001
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8001  # Update backend URL
+```
+
+#### Missing Environment Variables
+
+**Error**: `OPENAI_API_KEY not found`
+
+**Solution**: Ensure you've set the required environment variables:
+```bash
+export OPENAI_API_KEY=your-key-here
+docker compose up --build
+```
+
+Or add them to a `.env` file in the project root.
+
+#### Build Failures
+
+**Frontend build fails** with "Module not found":
+```bash
+# Clean and rebuild
+docker compose down
+docker compose build --no-cache frontend
+docker compose up
+```
+
+**Backend build fails**:
+```bash
+# Check Python dependencies
+docker compose build --no-cache backend
+docker compose logs backend
+```
+
+#### Health Check Failing
+
+If the backend health check fails repeatedly:
+
+1. **Check logs**:
+```bash
+docker compose logs backend
+```
+
+2. **Verify health endpoint**:
+```bash
+curl http://localhost:8000/health
+```
+
+3. **Increase start period** in `docker-compose.yml`:
+```yaml
+healthcheck:
+  start_period: 60s  # Increase from 40s
+```
+
+#### Database Issues
+
+**Reset the database** (⚠️ deletes all data):
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+### Production Deployment Note
+
+**Important**: This Docker setup is optimized for **local development only**.
+
+For **production deployments**, the application is currently deployed using:
+- **Frontend**: Vercel (optimized for Next.js)
+- **Backend**: Hugging Face Spaces (with PostgreSQL database)
+
+The Docker setup uses:
+- SQLite database (vs. PostgreSQL in production)
+- Development-friendly configurations
+- Local environment variables
+
+Do not use `docker-compose.yml` for production deployments. Existing cloud deployments remain unchanged.
+
 ## Building for Production
 
 ### Frontend Build
@@ -225,12 +421,12 @@ cd frontend
 npm run build
 ```
 
-This creates an optimized production build in the `out` directory.
+This creates an optimized production build in the `.next` directory (standalone mode enabled).
 
 ### Backend for Production
 For production deployment, consider using:
 - Gunicorn: `gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app`
-- Or containerize with Docker
+- Or deploy to Hugging Face Spaces (current production setup)
 
 ## Contributing
 
