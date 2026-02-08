@@ -7,8 +7,9 @@ from app.routes import profile
 from app.utils import ensure_tables_exist
 import os
 import logging
+from app.logging_config import setup_logging
 
-logging.basicConfig(level=logging.INFO)
+setup_logging()
 logger = logging.getLogger(__name__)
 
 # Ensure tables exist
