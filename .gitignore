@@ -187,3 +187,7 @@ config.json
 .semaphore/
 .circleci/
 .github/workflows/
+
+# Docker artifacts
+docker-compose.override.yml
+.dockerignore
