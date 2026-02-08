@@ -190,4 +190,3 @@ config.json
 
 # Docker artifacts
 docker-compose.override.yml
-.dockerignore
