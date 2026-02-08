@@ -1,0 +1,190 @@
+# Docker Compose Service Contract
+# Feature: 004-production-dockerization
+# Date: 2026-02-08
+# Phase: 1 (Design & Contracts)
+
+# This file documents the contract for docker-compose.yml services.
+# It defines the interface between frontend and backend services,
+# including networking, environment variables, and health checks.
+
+version: '3.8'
+
+services:
+  # Backend Service Contract
+  backend:
+    description: "FastAPI backend service providing REST API for todos, auth, profile, and chatbot"
+
+    build:
+      context: "./backend"
+      dockerfile: "Dockerfile.local"
+
+    ports:
+      - "8000:8000"  # HTTP API endpoint
+
+    environment:
+      # Required variables (must be provided)
+      - JWT_SECRET_KEY          # Format: string (min 32 chars recommended)
+      - OPENAI_API_KEY          # Format: string (OpenRouter API key)
+
+      # Optional variables (defaults provided)
+      - DATABASE_URL            # Default: sqlite:///./todo_dev.db
+      - OPENAI_BASE_URL         # Default: https://openrouter.ai/api/v1
+      - MODEL                   # Default: mistralai/mistral-7b-instruct
+
+    volumes:
+      - backend-data:/app       # Persist SQLite database and app data
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s             # Check every 30 seconds
+      timeout: 10s              # Timeout if no response in 10s
+      retries: 3                # Mark unhealthy after 3 consecutive failures
+      start_period: 40s         # Grace period during startup
+
+    restart: unless-stopped     # Auto-restart on failure (except manual stop)
+
+    exposed_endpoints:
+      - "/health"               # Health check endpoint (GET)
+      - "/docs"                 # OpenAPI documentation (GET)
+      - "/auth/*"               # Authentication endpoints (POST)
+      - "/todos/*"              # Todo CRUD endpoints (GET, POST, PUT, DELETE)
+      - "/profile/*"            # User profile endpoints (GET, PUT)
+      - "/chat/*"               # Chatbot endpoints (POST)
+
+    network_access:
+      - "Accessible by frontend service via internal network (service name: backend)"
+      - "Accessible by host browser via localhost:8000"
+
+  # Frontend Service Contract
+  frontend:
+    description: "Next.js frontend providing UI for todo management and chatbot interaction"
+
+    build:
+      context: "./frontend"
+      dockerfile: "Dockerfile"
+
+    ports:
+      - "3000:3000"             # HTTP web server
+
+    environment:
+      # Required variables (must be provided)
+      - NEXT_PUBLIC_API_URL     # Format: http://localhost:8000 (for browser requests)
+
+    depends_on:
+      backend:
+        condition: service_healthy  # Wait for backend health check to pass
+
+    restart: unless-stopped     # Auto-restart on failure (except manual stop)
+
+    network_access:
+      - "Makes HTTP requests to backend via NEXT_PUBLIC_API_URL (browser-side)"
+      - "Accessible by host browser via localhost:3000"
+
+    notes:
+      - "Frontend uses client-side rendering; API calls originate from browser, not server"
+      - "NEXT_PUBLIC_API_URL must be accessible from user's browser (localhost:8000)"
+      - "No server-side API calls (no need for internal backend:8000 reference)"
+
+# Shared Resources
+volumes:
+  backend-data:
+    description: "Persistent volume for backend data (SQLite database, logs)"
+    driver: local
+
+# Network Contract
+networks:
+  default:
+    description: "Default bridge network for service-to-service communication"
+    driver: bridge
+    properties:
+      - "Automatic DNS resolution: Services can reference each other by name"
+      - "Isolated from host network except for explicitly mapped ports"
+
+# Service Interaction Contract
+
+## Frontend -> Backend Communication
+# - Frontend runs in user's browser (client-side rendering)
+# - Browser makes HTTP requests to http://localhost:8000 (exposed via port mapping)
+# - Backend responds with JSON data
+# - No server-side rendering or API proxying
+
+## Health Check Flow
+# 1. Backend container starts
+# 2. Docker runs health check command: curl -f http://localhost:8000/health
+# 3. Health check repeats every 30s
+# 4. After 3 consecutive failures, container marked unhealthy
+# 5. Frontend waits for backend:condition:service_healthy before starting
+# 6. Once backend healthy, frontend container starts
+
+## Environment Variable Override
+# Users can override defaults by creating .env file in repo root:
+#
+# Example .env:
+# JWT_SECRET_KEY=my-super-secret-key
+# OPENAI_API_KEY=sk-or-v1-xxxxx
+# DATABASE_URL=sqlite:///./custom.db
+# MODEL=anthropic/claude-3-sonnet
+
+## Startup Sequence
+# 1. docker compose up --build
+# 2. Build backend image (from backend/Dockerfile.local)
+# 3. Build frontend image (from frontend/Dockerfile)
+# 4. Start backend container
+# 5. Wait for backend health check to pass (up to 40s start_period + retries)
+# 6. Start frontend container (depends_on: backend:service_healthy)
+# 7. Both services running and accessible
+
+## Shutdown Sequence
+# 1. docker compose down
+# 2. Send SIGTERM to frontend container
+# 3. Frontend gracefully shuts down
+# 4. Send SIGTERM to backend container
+# 5. Backend gracefully shuts down (FastAPI handles signal)
+# 6. Containers stopped (volumes persist unless -v flag used)
+
+## Volume Persistence
+# - Backend data persists in backend-data volume
+# - SQLite database survives container restarts
+# - To clear data: docker compose down -v (removes volumes)
+# - To backup data: docker cp <container_id>:/app/todo_dev.db ./backup.db
+
+## Port Conflict Resolution
+# If ports 3000 or 8000 are already in use on host:
+#
+# Option 1: Stop conflicting service
+# Option 2: Change port mapping in docker-compose.yml:
+#   ports:
+#     - "3001:3000"  # Frontend now on localhost:3001
+#     - "8001:8000"  # Backend now on localhost:8001
+#
+#   Update frontend .env:
+#   NEXT_PUBLIC_API_URL=http://localhost:8001
+
+## Security Considerations
+# - Both containers run as non-root users (appuser, nextjs)
+# - .env files excluded from images via .dockerignore
+# - Secrets passed via environment variables (not hardcoded)
+# - Internal network isolated from host (only exposed ports accessible)
+# - Health checks verify service availability without exposing sensitive data
+
+## Performance Expectations
+# - Backend startup: <30 seconds
+# - Frontend build + startup: <2 minutes
+# - Health check response: <100ms
+# - Backend image size: <500MB
+# - Frontend image size: <1GB
+# - Memory usage: Backend ~200MB, Frontend ~300MB
+
+## Failure Modes
+# - Backend unhealthy: Frontend waits indefinitely (depends_on)
+# - Frontend crash: Auto-restarts (restart: unless-stopped)
+# - Backend crash: Auto-restarts (restart: unless-stopped)
+# - Port conflict: Container fails to start (clear error message)
+# - Missing env var: Container starts but app crashes with KeyError
+# - Database locked: SQLite WAL mode should prevent (existing config)
+
+## Compatibility
+# - Docker Engine: 20.10+
+# - Docker Compose: 2.0+
+# - Operating Systems: Windows, macOS, Linux (via Docker Desktop or native Docker)
+# - Architecture: amd64 (x86_64) - primary target
